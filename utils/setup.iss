@@ -5,7 +5,7 @@
 ;#define MyAppVersion "0.2.0.31"
 #define MyAppPublisher "Purk Project"
 #define MyAppURL "https://purkproject.com"
-#define MyAppExeName "qt-purk.exe"
+#define MyAppExeName "Purk.exe"
 ;#define BinariesPath "C:\jenkins\workdir\builds\purk-win-x64-v0.2.0.31(5d85ebf)"
 
 [Setup]
@@ -44,8 +44,8 @@ Root: HKCR; Subkey: ".purk.keys"; ValueType: string; ValueName: ""; ValueData: "
 Root: HKCR; Subkey: "PurkWalletDataFile"; ValueType: string; ValueName: ""; ValueData: "Purk Wallet's Data File"; Flags: uninsdeletekey
 Root: HKCR; Subkey: "PurkWalletDataKeysFile"; ValueType: string; ValueName: ""; ValueData: "Purk Wallet's Keys File"; Flags: uninsdeletekey
 
-Root: HKCR; Subkey: "PurkWalletDataFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-purk.exe,0"
-Root: HKCR; Subkey: "PurkWalletDataKeysFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\qt-purk.exe,0"
+Root: HKCR; Subkey: "PurkWalletDataFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\Purk.exe,0"
+Root: HKCR; Subkey: "PurkWalletDataKeysFile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\Purk.exe,0"
 
 
 [Files]

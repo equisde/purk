@@ -51,7 +51,7 @@ IF %ERRORLEVEL% NEQ 0 (
   goto error
 )
 
-msbuild src/qt-purk.vcxproj /p:SubSystem="WINDOWS,5.02" /p:Configuration=Release /t:Build
+msbuild src/Purk.vcxproj /p:SubSystem="WINDOWS,5.02" /p:Configuration=Release /t:Build
 
 IF %ERRORLEVEL% NEQ 0 (
   goto error
@@ -72,14 +72,14 @@ echo '%version%'
 
 
 mkdir bunch
-copy /Y qt-purk.exe bunch
+copy /Y Purk.exe bunch
 copy /Y purkd.exe bunch
 copy /Y simplewallet.exe bunch
 
 copy /Y %SSL_PATH_0_9_8%\libeay32.dll bunch
 copy /Y %SSL_PATH_0_9_8%\ssleay32.dll bunch
 
-%QT_PREFIX_PATH%\bin\windeployqt.exe bunch\qt-purk.exe
+%QT_PREFIX_PATH%\bin\windeployqt.exe bunch\Purk.exe
 
 
 cd bunch

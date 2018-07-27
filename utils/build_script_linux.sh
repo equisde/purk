@@ -34,7 +34,7 @@ if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
 fi
-make -j qt-purk;
+make -j Purk;
 if [ $? -ne 0 ]; then
     echo "Failed to make!"
     exit 1
@@ -62,8 +62,8 @@ echo $version_str
 mkdir -p purk;
 
 cp -Rv ../../src/gui/qt-daemon/html ./purk
-cp -Rv ../../utils/qt-purk.sh ./purk
-chmod 777 ./purk/qt-purk.sh
+cp -Rv ../../utils/Purk.sh ./purk
+chmod 777 ./purk/Purk.sh
 
 mkdir ./purk/lib
 cp $QT_PREFIX_PATH/lib/libicudata.so.56 ./purk/lib
@@ -94,7 +94,7 @@ cp $QT_PREFIX_PATH/resources/qtwebengine_resources_200p.pak ./purk
 cp $QT_PREFIX_PATH/resources/icudtl.dat ./purk
 
 
-cp -Rv src/purkd src/qt-purk src/simplewallet src/simpleminer src/connectivity_tool ./purk
+cp -Rv src/purkd src/Purk src/simplewallet src/simpleminer src/connectivity_tool ./purk
 
 
 tar -cjvf purk-linux-x64-$version_str.tar.bz2 purk

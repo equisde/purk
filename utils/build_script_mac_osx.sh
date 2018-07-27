@@ -27,9 +27,9 @@ if [ $? -ne 0 ]; then
     exit $?
 fi
 
-make -j qt-purk
+make -j Purk
 if [ $? -ne 0 ]; then
-    echo "Failed to make qt-purk"
+    echo "Failed to make Purk"
     exit $?
 fi
 
@@ -48,8 +48,8 @@ fi
 
 # copy boost files
 echo "Copying boost files...."
-mkdir -p qt-purk.app/Contents/Frameworks/boost_libs
-cp -R "$LOCAL_BOOST_LIBS_PATH/" qt-purk.app/Contents/Frameworks/boost_libs/
+mkdir -p Purk.app/Contents/Frameworks/boost_libs
+cp -R "$LOCAL_BOOST_LIBS_PATH/" Purk.app/Contents/Frameworks/boost_libs/
 if [ $? -ne 0 ]; then
     echo "Failed to cp workaround to MacOS"
     exit 1
@@ -59,24 +59,24 @@ fi
 # fix boost links
 echo "Fixing boost library links...."
 source ../../../utils/fix_boost_libs.sh
-update_links_in_boost_binary @executable_path/../Frameworks/boost_libs qt-purk.app/Contents/MacOS/qt-purk
-update_links_in_boost_libs @executable_path/../Frameworks/boost_libs qt-purk.app/Contents/Frameworks/boost_libs
+update_links_in_boost_binary @executable_path/../Frameworks/boost_libs Purk.app/Contents/MacOS/Purk
+update_links_in_boost_libs @executable_path/../Frameworks/boost_libs Purk.app/Contents/Frameworks/boost_libs
 
 
 
-$QT_PATH/clang_64/bin/macdeployqt qt-purk.app
+$QT_PATH/clang_64/bin/macdeployqt Purk.app
 if [ $? -ne 0 ]; then
-    echo "Failed to macdeployqt qt-purk.app"
+    echo "Failed to macdeployqt Purk.app"
     exit $?
 fi
 
-cp -R ../../../src/gui/qt-daemon/html qt-purk.app/Contents/MacOS
+cp -R ../../../src/gui/qt-daemon/html Purk.app/Contents/MacOS
 if [ $? -ne 0 ]; then
     echo "Failed to cp html to MacOS"
     exit $?
 fi
 
-cp ../../../src/gui/qt-daemon/app.icns qt-purk.app/Contents/Resources
+cp ../../../src/gui/qt-daemon/app.icns Purk.app/Contents/Resources
 if [ $? -ne 0 ]; then
     echo "Failed to cp app.icns to resources"
     exit $?
@@ -101,7 +101,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-mv qt-purk.app package_folder
+mv Purk.app package_folder
 if [ $? -ne 0 ]; then
     echo "Failed to top app package"
     exit 1
@@ -115,7 +115,7 @@ if [ $? -ne 0 ]; then
 fi
 
 
-#zip -r -y "purk-macos-x64-v0.2.0.zip" qt-purk.app
+#zip -r -y "purk-macos-x64-v0.2.0.zip" Purk.app
 #if [ $? -ne 0 ]; then
 #    echo "Failed to zip app"
 #    exit $?
