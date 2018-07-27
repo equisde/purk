@@ -157,7 +157,8 @@ m_transfering_window{nullptr},
 m_keys_path{nullptr},
 m_pass{nullptr},
 m_timer{nullptr},
-m_isDialog{false}
+m_isDialog{false},
+m_backend{nullptr}
 {
   //connect(m_d, SIGNAL(quitRequested()), SLOT(close()));
 
@@ -173,7 +174,8 @@ m_isDialog{false}
 
 bool Html5ApplicationViewer::init_config()
 {
-  epee::serialization::load_t_from_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
+  
+  epee::serialization::load_t_from_json_file(m_config, m_backend->get_config_folder() + "/" + GUI_CONFIG_FILENAME);
   if (!m_config.wallets_last_used_dir.size())
   {
     m_config.wallets_last_used_dir = tools::get_default_user_dir();
@@ -184,7 +186,7 @@ bool Html5ApplicationViewer::init_config()
 
 bool Html5ApplicationViewer::store_config()
 {
-  epee::serialization::store_t_to_json_file(m_config, m_backend.get_config_folder() + "/" + GUI_CONFIG_FILENAME);
+  epee::serialization::store_t_to_json_file(m_config, m_backend->get_config_folder() + "/" + GUI_CONFIG_FILENAME);
   return true;
 }
 
@@ -224,6 +226,16 @@ Html5ApplicationViewer::~Html5ApplicationViewer()
   store_config();
   delete m_d;
 }
+
+void Html5ApplicationViewer::stop_backend()
+{
+  if (m_backend != nullptr) {
+    m_backend->stop();
+    
+    delete m_backend;  
+  }
+}
+
 void Html5ApplicationViewer::closeEvent(QCloseEvent *event)
 {
   if (!m_deinitialize_done)
@@ -305,6 +317,31 @@ void Html5ApplicationViewer::trayIconActivated(QSystemTrayIcon::ActivationReason
   }
 }
 
+bool Html5ApplicationViewer::removeDir(const QString & dirName)
+{
+  bool result = true;
+  QDir dir(dirName);
+
+  if (dir.exists()) {
+    Q_FOREACH(QFileInfo info, dir.entryInfoList(QDir::NoDotAndDotDot | QDir::System | QDir::Hidden  | QDir::AllDirs | QDir::Files, QDir::DirsFirst)) {
+    if (info.isDir()) {
+      result = removeDir(info.absoluteFilePath());
+    }
+    else {
+      result = QFile::remove(info.absoluteFilePath());
+    }
+
+    if (!result) {
+      return result;
+    }
+  }
+        
+  result = QDir().rmdir(dirName);
+}
+
+return result;
+}
+
 void Html5ApplicationViewer::loadFile(const QString &fileName)
 {
   m_d->m_webView->setUrl(QUrl::fromLocalFile(Html5ApplicationViewerPrivate::adjustPath(fileName)));
@@ -383,7 +420,7 @@ bool Html5ApplicationViewer::on_request_quit()
       Qt::QueuedConnection);
   }
   else
-    m_backend.send_stop_signal();
+    m_backend->send_stop_signal();
   return true;
 }
 
@@ -453,7 +490,7 @@ QString Html5ApplicationViewer::request_aliases()
 {
   QString res = "{}";
   view::alias_set al_set;
-  if (m_backend.get_aliases(al_set))
+  if (m_backend->get_aliases(al_set))
   {
     std::string json_str;
     epee::serialization::store_t_to_json(al_set, json_str);
@@ -471,15 +508,16 @@ bool Html5ApplicationViewer::show_msg_box(const std::string& message)
 
 bool Html5ApplicationViewer::start_backend(int argc, char* argv[])
 {
-  m_backend.set_app(this);
-  return m_backend.start(argc, argv, this);
+  m_backend = new daemon_backend();
+  m_backend->set_app(this);
+  return m_backend->start(argc, argv, this);
 }
 
 void Html5ApplicationViewer::start_wallet_rpc()
 {
   int argc = 7;
   char *argv[7];
-  argv[0] = "qt-purk";
+  argv[0] = "Purk";
   argv[1] = "--rpc-bind-port";
   argv[2] = "8081";
   argv[3] = "--wallet-file";
@@ -577,7 +615,7 @@ void Html5ApplicationViewer::close_wallet()
 {
   stop_rpc();
 
-  m_backend.close_wallet();
+  m_backend->close_wallet();
 }
 
 void Html5ApplicationViewer::add_address(const QString& name, const QString& address,
@@ -692,7 +730,7 @@ QString Html5ApplicationViewer::transfer(const QString& json_transfer_object)
 
   currency::transaction res_tx = AUTO_VAL_INIT(res_tx);
 
-  if (!m_backend.transfer(tp, res_tx))
+  if (!m_backend->transfer(tp, res_tx))
   {
     return epee::serialization::store_t_to_json(tr).c_str();
   }
@@ -731,7 +769,7 @@ void Html5ApplicationViewer::generate_wallet()
 		return;
 
 	std::string seed; //not used yet
-	m_backend.generate_wallet(path.toStdString(), pass.toStdString(), seed);
+	m_backend->generate_wallet(path.toStdString(), pass.toStdString(), seed);
 
     if (seed != "") {
         QMessageBox msgBox(this);
@@ -741,19 +779,76 @@ void Html5ApplicationViewer::generate_wallet()
     }
 }
 
-void Html5ApplicationViewer::restore_wallet(const QString& restore_text, 
-	const QString& password, const QString& path)
+QString Html5ApplicationViewer::get_password()
 {
-	if (!path.length())
-	{
-		show_msg_box("Empty wallet path");
-		return;
-	}
+  bool ok;
+  QString pass = QInputDialog::getText(this, tr("Enter wallet password"),
+    tr("Password:"), QLineEdit::Password,
+    QString(), &ok);
 
-	m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+  if (!ok)
+    return QString();
+  return pass;
+}
 
-	m_backend.restore_wallet(path.toStdString(), restore_text.toStdString(), 
-		password.toStdString());
+QString Html5ApplicationViewer::get_seed_text()
+{
+  bool ok;
+  QString seed_text = QInputDialog::getMultiLineText(this, tr("Enter seed words"),
+    tr("Enter seed words"), QString(), &ok);
+
+  if (!ok)
+    return QString();
+
+  return seed_text;
+}
+
+bool Html5ApplicationViewer::restore_wallet(const QString& restore_text, const QString& password, const QString& path)
+{
+  if (!path.length())
+  {
+    show_msg_box("Empty wallet path");
+    return false;
+  }
+ 
+  m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
+ 
+  m_backend->set_restore_wallet_from_zero(true);
+
+  return m_backend->restore_wallet(path.toStdString(), restore_text.toStdString(), password.toStdString());
+} 
+
+void Html5ApplicationViewer::reconnect()
+{
+  stop_backend();
+
+  int argc = 1;
+  char *argv[1];
+  argv[0] = "Purk";
+  start_backend(argc, argv);
+}
+
+void Html5ApplicationViewer::resync_blockcahin()
+{
+  QMessageBox msgBox(QMessageBox::NoIcon,
+    "Warning!",
+    "Warning! All blockchain data will be deleted and resynced from 0. This will take some time. Do you want to proceed?",
+    QMessageBox::Yes | QMessageBox::No, 
+    this);
+  msgBox.setDefaultButton(QMessageBox::Yes);
+  msgBox.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
+
+  if (msgBox.exec() == QMessageBox::Yes) {
+    QString blockchain_foler = QString::fromStdString(m_backend->get_config_folder());
+    delete m_backend;
+
+    removeDir(blockchain_foler);  
+    
+    int argc = 1;
+    char *argv[1];
+    argv[0] = "Purk";
+    start_backend(argc, argv);
+  }
 }
 
 void Html5ApplicationViewer::place_to_clipboard(const QString& data)
@@ -796,7 +891,7 @@ void Html5ApplicationViewer::open_wallet()
 	if (!ok)
 		return;
 
-	m_backend.open_wallet(path.toStdString(), pass.toStdString());
+	m_backend->open_wallet(path.toStdString(), pass.toStdString());
 }
 
 #include "html5applicationviewer.moc"

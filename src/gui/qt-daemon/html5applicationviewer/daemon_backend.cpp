@@ -173,6 +173,16 @@ bool daemon_backend::stop()
     return true;
 }
 
+void daemon_backend::deinit_ccore()
+{
+    m_ccore.deinit();
+}
+
+void daemon_backend::reset_genesis_block()
+{
+    m_ccore.cleare_storage();
+}
+
 std::string daemon_backend::get_config_folder()
 {
     return m_data_dir;
@@ -188,6 +198,10 @@ int daemon_backend::start_wallet_rpc()
 
 void daemon_backend::set_app(Html5ApplicationViewer *_app) {
     m_app = _app;
+}
+
+void daemon_backend::set_restore_wallet_from_zero(bool) {
+    m_wallet->flag_restore_from_zero = true;
 }
 
 void daemon_backend::main_worker(const po::variables_map& vm)
@@ -289,8 +303,7 @@ void daemon_backend::main_worker(const po::variables_map& vm)
     LOG_PRINT_L0("Deinitializing core...");
     dsi.text_state = "Deinitializing core";
     m_pview->update_daemon_status(dsi);
-    m_ccore.deinit();
-
+    m_ccore.deinit();   
 
     LOG_PRINT_L0("Deinitializing rpc server ...");
     dsi.text_state = "Deinitializing rpc server";

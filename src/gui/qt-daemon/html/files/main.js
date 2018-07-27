@@ -46,6 +46,12 @@ function on_update_daemon_state(info_obj) {
   //var info_obj = jQuery.parseJSON(daemon_info_str);
 
   if (info_obj.daemon_network_state == 0) {
+    document.getElementById("connectivity_reconnect").style.visibility = "visible";
+  } else {
+    document.getElementById("connectivity_reconnect").style.visibility = "hidden";
+  }
+
+  if (info_obj.daemon_network_state == 0) {
     //daemon_network_state_connecting
     //do nothing
   } else if (info_obj.daemon_network_state == 1) {
@@ -63,6 +69,7 @@ function on_update_daemon_state(info_obj) {
       );
     $("#open_wallet_button").button("disable");
     $("#generate_wallet_button").button("disable");
+    $("#restore_wallet_button").button("disable");
     $("#domining_button").button("disable");
     //show progress
   } else if (info_obj.daemon_network_state == 2) {
@@ -71,6 +78,7 @@ function on_update_daemon_state(info_obj) {
     $("#daemon_status_text").addClass("daemon_view_general_status_value_success_text");
     $("#open_wallet_button").button("enable");
     $("#generate_wallet_button").button("enable");
+    $("#restore_wallet_button").button("enable");
     disable_tab(document.getElementById("wallet_view_menu"), false);
 //    disable_tab(document.getElementById("button_view_menu"), true);
     //load aliases
@@ -86,6 +94,7 @@ function on_update_daemon_state(info_obj) {
     $("#daemon_status_text").removeClass("daemon_view_general_status_value_success_text");
     $("#open_wallet_button").button("disable");
     $("#generate_wallet_button").button("disable");
+    $("#restore_wallet_button").button("disable");
     //$("#domining_button").button("disable");
 
     hide_wallet();
@@ -341,6 +350,37 @@ function hide_wallet() {
   $("#wallet_welcome_screen_area").show();
 }
 
+function on_reconnect() 
+{
+  Qt_parent.reconnect();
+}
+
+function on_resunc_blockcahin()
+{
+  Qt_parent.resync_blockcahin();
+}
+
+function on_restore_wallet()
+{
+  var seed_phrase = Qt_parent.get_seed_text();
+  if (seed_phrase.length === 0)
+    return;
+
+  var wallet_path = Qt_parent.browse_wallet(false);
+  if (wallet_path.length === 0)
+    return;
+
+  var pass = Qt_parent.get_password();
+  if (pass.length === 0)
+    return;
+
+ var r = Qt_parent.restore_wallet(seed_phrase, pass, wallet_path);
+ if(!r) 
+ {
+      Qt_parent.message_box("Unable to restore wallet");
+  }
+}
+
 function on_switch_view(swi) {
   if (swi.view === 1) {
     //switch to dashboard view
@@ -541,6 +581,7 @@ $(function() {
 
   $("#open_wallet_button").button("disable");
   $("#generate_wallet_button").button("disable");
+  $("#restore_wallet_button").button("disable");
   $("#domining_button").button("disable");
 
   //$("#transfer_button_id").button("disable");
@@ -548,6 +589,9 @@ $(function() {
   $("#transfer_button_id").on("click", on_transfer);
   $("#generate_wallet_button").on("click", on_generate_new_wallet);
   $("#close_wallet_button_id").on("click", on_close_wallet);
+  $('#restore_wallet_button').on('click', on_restore_wallet);
+  $('#connectivity_reconnect').on('click', on_reconnect);
+  $('#connectivity_resync_blockahin').on('click', on_resunc_blockcahin);
 
   setTimeout(init_btc_exchange_rate, 100);
 

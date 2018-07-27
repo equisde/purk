@@ -52,6 +52,8 @@ public:
   ~daemon_backend();
   bool start(int argc, char* argv[], view::i_view* pview_handler);
   bool stop();
+  void deinit_ccore();
+  void reset_genesis_block();
   bool send_stop_signal();
   bool open_wallet(const std::string& path, const std::string& password);
   bool generate_wallet(const std::string& path, const std::string& password, 
@@ -64,6 +66,7 @@ public:
   std::string get_config_folder();
   int start_wallet_rpc();
   void set_app(Html5ApplicationViewer *);
+  void set_restore_wallet_from_zero(bool);
 
 private:
   void main_worker(const po::variables_map& vm);

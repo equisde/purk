@@ -47,6 +47,7 @@ namespace currency
      static void init_options(boost::program_options::options_description& desc);
      bool init(const boost::program_options::variables_map& vm);
      bool set_genesis_block(const block& b);
+     void cleare_storage();
      bool deinit();
      uint64_t get_current_blockchain_height();
      std::string get_config_folder();

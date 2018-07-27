@@ -232,6 +232,17 @@ bool blockchain_storage::reset_and_set_genesis_block(const block& b)
   add_new_block(b, bvc);
   return bvc.m_added_to_main_chain && !bvc.m_verifivation_failed;
 }
+
+void blockchain_storage::cleare_storage()
+{
+  m_transactions.clear();
+  m_spent_keys.clear();
+  m_blocks.clear();
+  m_blocks_index.clear();
+  m_alternative_chains.clear();
+  m_outputs.clear();
+  m_scratchpad.clear();
+}
 //------------------------------------------------------------------
 //TODO: not the best way, add later update method instead of full copy
 bool blockchain_storage::copy_scratchpad(std::vector<crypto::hash>& scr)

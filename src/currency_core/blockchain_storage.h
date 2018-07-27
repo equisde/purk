@@ -93,6 +93,7 @@ namespace currency
     wide_difficulty_type get_difficulty_for_next_block();
     bool add_new_block(const block& bl_, block_verification_context& bvc);
     bool reset_and_set_genesis_block(const block& b);
+    void cleare_storage();
     bool create_block_template(block& b, const account_public_address& miner_address, wide_difficulty_type& di, uint64_t& height, const blobdata& ex_nonce, bool vote_for_donation, const alias_info& ai);
     bool have_block(const crypto::hash& id);
     size_t get_total_transactions();

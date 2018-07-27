@@ -134,6 +134,11 @@ namespace currency
   {
     return m_blockchain_storage.reset_and_set_genesis_block(b);
   }
+
+  void core::cleare_storage()
+  {
+    m_blockchain_storage.cleare_storage();
+  }
   //-----------------------------------------------------------------------------------------------
   bool core::load_state_data()
   {

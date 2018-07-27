@@ -60,8 +60,11 @@ protected:
 	QString browse_wallet(bool existing);
     void open_wallet();
     void generate_wallet();
-	void restore_wallet(const QString& restore_text, const QString& password, 
-		const QString& path);
+    QString get_password();
+    QString get_seed_text();
+    bool restore_wallet(const QString& restore_text, const QString& password, const QString& path);
+    void reconnect();
+    void resync_blockcahin();
     void close_wallet();
 	void add_address(const QString& name, const QString& address,
 		const QString& alias, const QString& paymentId);
@@ -78,6 +81,7 @@ protected:
 	void trayIconActivated(QSystemTrayIcon::ActivationReason reason);
 
 private:
+    bool removeDir(const QString & dirName);
     void loadFile(const QString &fileName);
     void loadUrl(const QUrl &url);
     void closeEvent(QCloseEvent *event);
@@ -85,6 +89,7 @@ private:
 
     bool store_config();
     void stop_rpc();
+    void stop_backend();
 
     //------- i_view ---------
     virtual bool update_daemon_status(const view::daemon_status_info& info);
@@ -104,7 +109,7 @@ private:
 	void initTrayIcon(const std::string& htmlPath);
 
     class Html5ApplicationViewerPrivate *m_d;
-    daemon_backend m_backend;
+    daemon_backend *m_backend;
     std::atomic<bool> m_quit_requested;
     std::atomic<bool> m_deinitialize_done;
     std::atomic<bool> m_backend_stopped;
