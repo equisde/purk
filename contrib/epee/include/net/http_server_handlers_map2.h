@@ -274,6 +274,7 @@ namespace epee
   if(!callback_f(req.params, resp.result, fail_resp.error, m_conn_context)) \
   { \
     epee::serialization::store_t_to_json(static_cast<epee::json_rpc::error_response&>(fail_resp), response_info.m_body); \
+    response_info.m_mime_tipe = "application/json"; \
     return true; \
   } \
   FINALIZE_OBJECTS_TO_JSON(method_name) \
@@ -290,6 +291,7 @@ namespace epee
   if(!callback_f(req.params, resp.result, fail_resp.error, m_conn_context, response_info)) \
   { \
     epee::serialization::store_t_to_json(static_cast<epee::json_rpc::error_response&>(fail_resp), response_info.m_body); \
+    response_info.m_mime_tipe = "application/json"; \
     return true; \
   } \
   FINALIZE_OBJECTS_TO_JSON(method_name) \
@@ -308,6 +310,7 @@ namespace epee
     fail_resp.error.code = -32603; \
     fail_resp.error.message = "Internal error"; \
     epee::serialization::store_t_to_json(static_cast<epee::json_rpc::error_response&>(fail_resp), response_info.m_body); \
+    response_info.m_mime_tipe = "application/json"; \
     return true; \
   } \
   FINALIZE_OBJECTS_TO_JSON(method_name) \
