@@ -77,8 +77,8 @@ namespace currency
   {
     if (m_p2p.get_payload_object().get_core().get_blockchain_storage().is_storing_blockchain())
     {
-      res.status = CORE_RPC_STATUS_BUSY; 
-      return true; 
+      res.status = CORE_RPC_STATUS_BUSY;
+      return true;
     }
 
     res.height = m_core.get_current_blockchain_height();
@@ -104,11 +104,11 @@ namespace currency
       res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_online;
     else
       res.daemon_network_state = COMMAND_RPC_GET_INFO::daemon_network_state_synchronizing;
-    
+
     res.synchronization_start_height = m_p2p.get_payload_object().get_core_inital_height();
     res.max_net_seen_height = m_p2p.get_payload_object().get_max_seen_height();
     m_p2p.get_maintainers_info(res.mi);
-    
+
     res.status = CORE_RPC_STATUS_OK;
     return true;
   }
@@ -499,7 +499,7 @@ namespace currency
       error_resp.message = "Wrong block blob";
       return false;
     }
-    
+
     block b = AUTO_VAL_INIT(b);
     if(!parse_and_validate_block_from_blob(blockblob, b))
     {
@@ -528,7 +528,7 @@ namespace currency
     {
       reward += out.amount;
     }
-  
+
   if(h && !(h%CURRENCY_DONATIONS_INTERVAL) /*&& h > 21600*/)
   {
     bool r = m_core.get_blockchain_storage().lookfor_donation(blk.miner_tx, donation, royalty);
@@ -638,7 +638,7 @@ namespace currency
     }
     block blk = AUTO_VAL_INIT(blk);
     bool r = m_core.get_blockchain_storage().get_block_by_height(req.height, blk);
-    
+
     bool responce_filled = fill_block_header_responce(blk, false, res.block_header);
     if (!responce_filled)
     {
@@ -660,7 +660,7 @@ namespace currency
     }
     alias_info_base aib = AUTO_VAL_INIT(aib);
     if(!validate_alias_name(req.alias))
-    {      
+    {
       res.status = "Alias have wrong name";
       return false;
     }
@@ -719,7 +719,7 @@ namespace currency
       }
       res.block_hash = string_tools::pod_to_hex(get_block_hash(b));
       res.block_time = b.timestamp;
-          
+
       std::vector<crypto::hash> txs_ids;
       txs_ids.reserve(b.tx_hashes.size());
       for(const auto& tx: b.tx_hashes) {
@@ -746,7 +746,7 @@ namespace currency
           transfer_rpc_details transfer;
           transfer.tx_hash = string_tools::pod_to_hex(hash);
           transfer.payment_id = string_tools::pod_to_hex(payment_id);
-          
+
           for (const auto& vout: tx.vout) {
               const txout_to_key* key_out = boost::get<txout_to_key>(&vout.target);
               if (!key_out) {
@@ -771,7 +771,7 @@ namespace currency
     crypto::hash h = null_hash;
     bool r = string_tools::hex_to_pod(hi.block_id, h);
     CHECK_AND_ASSERT_MES(r, false, "wrong block_id parameter passed: " << hi.block_id);
-        
+
 
     crypto::hash block_chain_id = m_core.get_blockchain_storage().get_block_id_by_height(hi.height);
     CHECK_AND_ASSERT_MES(block_chain_id != null_hash, false, "internal error: can't get block id by height: " << hi.height);
@@ -795,7 +795,7 @@ namespace currency
       std::vector<crypto::hash> ad;
       r = get_block_scratchpad_addendum(*it, ad);
       CHECK_AND_ASSERT_MES(r, false, "Failed to add block addendum");
-      addendum_to_hexstr(ad, res.back().addm);      
+      addendum_to_hexstr(ad, res.back().addm);
     }
     return true;
   }
@@ -832,11 +832,11 @@ namespace currency
     COMMAND_RPC_GETBLOCKTEMPLATE::response bt_res = AUTO_VAL_INIT(bt_res);
 
     //bt_req.alias_details  - set alias here
-    bt_req.dev_bounties_vote = epee::serialization::storage_entry(true); //set vote 
+    bt_req.dev_bounties_vote = epee::serialization::storage_entry(true); //set vote
     bt_req.reserve_size = 0; //if you want to put some data into extra
     // !!!!!!!! SET YOUR WALLET ADDRESS HERE  !!!!!!!!
     bt_req.wallet_address = "PK2LbDFDZ8FYcAPW82Ku5pdgN5uAPbKTSQHNTbpv6qfYaowRjEuEoBdKEJKA1jQE1QCDzKhmoNVh8D1k5DicgNAo1uVCocrsY";
-    
+
     if(!on_getblocktemplate(bt_req, bt_res, err, cntx))
       return false;
 
@@ -866,7 +866,7 @@ namespace currency
       res.status = CORE_RPC_STATUS_BUSY;
       return true;
     }
-    
+
     //TODO: add login information here
 
     if(!get_addendum_for_hi(req.hi, res.job.addms))
@@ -898,7 +898,7 @@ namespace currency
       res.status = CORE_RPC_STATUS_BUSY;
       return true;
     }
-    
+
     if(!get_addendum_for_hi(req.hi, res.jd.addms))
     {
       res.status = "Fail at get_addendum_for_hi, check daemon logs for details";
@@ -924,7 +924,7 @@ namespace currency
     }
     std::vector<crypto::hash> scratchpad_local;
     m_core.get_blockchain_storage().copy_scratchpad(scratchpad_local);
-    addendum_to_hexstr(scratchpad_local, res.scratchpad_hex); 
+    addendum_to_hexstr(scratchpad_local, res.scratchpad_hex);
     get_current_hi(res.hi);
     res.status = CORE_RPC_STATUS_OK;
     return true;
@@ -979,7 +979,7 @@ namespace currency
       return true;
     }
 
-    if(!m_core.get_blockchain_storage().extport_scratchpad_to_file(req.local_file_path))    
+    if(!m_core.get_blockchain_storage().extport_scratchpad_to_file(req.local_file_path))
       res.status = CORE_RPC_STATUS_BUSY;
     else
       res.status = CORE_RPC_STATUS_OK;
@@ -1000,10 +1000,8 @@ namespace currency
     uint32_t str_len = static_cast<uint32_t>(json_hi.size());
     response_info.m_body.append(reinterpret_cast<const char*>(&str_len), sizeof(str_len));
     response_info.m_body.append(json_hi.data(), json_hi.size());
-    m_core.get_blockchain_storage().copy_scratchpad(response_info.m_body);    
+    m_core.get_blockchain_storage().copy_scratchpad(response_info.m_body);
 
-    //TODO: remove this code
-    LOG_PRINT_L0("[getfullscratchpad2]: json prefix len: " << str_len << ", JSON: " << json_hi);
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
