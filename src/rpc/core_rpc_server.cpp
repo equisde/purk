@@ -360,7 +360,7 @@ namespace currency
     if(m_core.get_current_blockchain_height() <= h)
     {
       error_resp.code = CORE_RPC_ERROR_CODE_TOO_BIG_HEIGHT;
-      error_resp.message = std::string("To big height: ") + std::to_string(h) + ", current blockchain height = " +  std::to_string(m_core.get_current_blockchain_height());
+      error_resp.message = std::string("Height is too big: ") + std::to_string(h) + ", current blockchain height = " +  std::to_string(m_core.get_current_blockchain_height());
     }
     res = string_tools::pod_to_hex(m_core.get_block_id_by_height(h));
     return true;
@@ -633,7 +633,7 @@ namespace currency
     if(m_core.get_current_blockchain_height() <= req.height)
     {
       error_resp.code = CORE_RPC_ERROR_CODE_TOO_BIG_HEIGHT;
-      error_resp.message = std::string("To big height: ") + std::to_string(req.height) + ", current blockchain height = " +  std::to_string(m_core.get_current_blockchain_height());
+      error_resp.message = std::string("Height is too big: ") + std::to_string(req.height) + ", current blockchain height = " +  std::to_string(m_core.get_current_blockchain_height());
       return false;
     }
     block blk = AUTO_VAL_INIT(blk);
@@ -661,7 +661,7 @@ namespace currency
     alias_info_base aib = AUTO_VAL_INIT(aib);
     if(!validate_alias_name(req.alias))
     {
-      res.status = "Alias have wrong name";
+      res.status = "Alias has wrong name";
       return false;
     }
     if(!m_core.get_blockchain_storage().get_alias_info(req.alias, aib))
@@ -964,7 +964,7 @@ namespace currency
     if(!m_core.handle_block_found(b))
     {
       res.status = "Block not accepted";
-      LOG_ERROR("Submited block not accepted");
+      LOG_ERROR("Submitted block not accepted");
       return true;
     }
     res.status = CORE_RPC_STATUS_OK;
