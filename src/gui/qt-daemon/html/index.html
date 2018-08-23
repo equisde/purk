@@ -231,6 +231,14 @@
                         <input name="address" type="hidden" class="form-control" id="address" value="wallet_id">
                     </div>
                     <div class="form-group">
+                      <label for="minimum" class="form-check-label">Minimum donation amount</label>
+                      <input name="minimum" type="number" class="form-control" min="0.01" step="0.01" value="0.01" />
+                    </div>
+                    <div class="form-check">
+                      <label for="stats" class="form-check-label">Enable statistics tracking?</label>
+                      <input name="stats" type="checkbox" class="form-check-input" id="stats" />
+                    </div>			
+                    <div class="form-group">
                         <label for="size">Button size:</label>
                         <select class="form-control" name="size" id="size">
                             <option value="0">Small</option>
