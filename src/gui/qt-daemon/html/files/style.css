@@ -395,6 +395,12 @@ html {
     width: 570px;
     font-size: 12px;
 }
+ #donate_form input[type="number"]{
+    height: 16px;
+    padding: 5px;
+    width: 285px;
+    font-size: 12px;
+}
  #donate_form .form-group {
     display:block;
     margin-bottom:15px;
