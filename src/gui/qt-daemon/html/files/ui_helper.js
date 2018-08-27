@@ -60,16 +60,18 @@ $(document).ready(function() {
   $("#donate_form").submit(function(e) {
     e.preventDefault();
 
-    var url = $("#website-url").val();
     var address = $("#address").val();
     var size = $("#size").val();
+    var stats = $("#stats").val();
+    var minimum = $("input[name=minimum]").val()
 
     var old_html = $("#donate_form").html();
 
     $.post("https://api.purkproject.com/?wallet=1", {
-      url: url,
       address: address,
-      size: size
+      size: size,
+      stats: stats,
+      minimum: minimum
     })
       .done(function(data) {
         $("#donate_form").html(
