@@ -104,12 +104,12 @@ html {
  .view_hidden {
     display: none;
 }
- .inline_menu_bar_item_disabled {
-     color: #777;
-     cursor: default;
+.inline_menu_bar_item_disabled {
+  color: #aaa;
+  cursor: default;
 }
  .inline_menu_bar_item_disabled:hover {
-    color: #777;
+    color: #aaa;
 }
 /*----- Dashboard ------*/
  span.daemon_view_general_status_value_success_text {
