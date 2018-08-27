@@ -1,23 +1,23 @@
-// Copyright (c) 2012-2013 The Cryptonote developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+  // Copyright (c) 2012-2013 The Cryptonote developers
+  // Distributed under the MIT/X11 software license, see the accompanying
+  // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-// Copyright (c) 2017-2018 The Purk Project Developers
-// Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+  // Copyright (c) 2017-2018 The Purk Project Developers
+  // Distributed under the MIT/X11 software license, see the accompanying
+  // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "include_base_utils.h"
-using namespace epee;
+  #include "include_base_utils.h"
+  using namespace epee;
 
-#include "wallet_rpc_server.h"
-#include "common/command_line.h"
-#include "currency_core/currency_format_utils.h"
-#include "currency_core/account.h"
-#include "misc_language.h"
-#include "crypto/hash.h"
+  #include "wallet_rpc_server.h"
+  #include "common/command_line.h"
+  #include "currency_core/currency_format_utils.h"
+  #include "currency_core/account.h"
+  #include "misc_language.h"
+  #include "crypto/hash.h"
 
-namespace tools
-{
+  namespace tools
+  {
   volatile bool m_show = false;
   uint64_t m_amount = 0;
   std::string m_address = "";
@@ -115,6 +115,195 @@ namespace tools
     return true;
   }
   //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::wallet_rpc_server::on_sum_inputs(const wallet_rpc::COMMAND_RPC_SUM_INPUTS::request& req, wallet_rpc::COMMAND_RPC_SUM_INPUTS::response& res, epee::json_rpc::error& er, wallet_rpc_server::connection_context& cntx)
+  {
+    tools::wallet2::transfer_container transfers;
+    m_wallet.get_transfers(transfers);
+    int count = 0;
+    size_t total_size{0};
+    uint64_t total_amount{0};
+    for (const auto& transfer_detail : transfers) {
+        uint64_t amount = transfer_detail.amount();
+        if (amount < ANTI_OVERFLOW_AMOUNT) {
+            if (m_wallet.is_transaction_available(transfer_detail)) {
+                total_size += get_object_blobsize(transfer_detail.m_tx);
+                total_amount += amount;
+                count++;
+            }
+        }
+    }
+
+    std::istringstream iss(currency::print_money(total_amount));
+    res.blocks = count;
+    res.size = total_size / 1024.0f;
+    iss >> res.amount;
+
+    return true;
+  }
+
+  //----------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::get_consolidation_details(const wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::request& req, wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  {
+      std::list<std::vector<tools::wallet2::transfer_container::iterator>> temp_selected_transfers;
+
+      uint64_t total_size_bytes{0};
+      uint64_t total_amount{0};
+      double total_fee{0};
+
+      m_wallet.consolidate_inputs(temp_selected_transfers, &total_amount, &total_size_bytes);
+
+      res.blocks = temp_selected_transfers.size();
+      res.total_size = total_size_bytes / 1024.0f;
+
+      uint64_t count{0};
+      std::vector<uint64_t>blocks_amount;
+
+      size_t tx_count{0};
+      uint64_t consolidate_total_amount{0};
+      for (auto it : temp_selected_transfers) {
+          wallet_rpc::consolidate_details cons_details;
+          cons_details.block = count++;
+
+          uint64_t block_size{0};
+          uint64_t block_amount{0};
+          const std::vector< tools::wallet2::transfer_container::iterator>& transaction_block = it;
+          for (size_t j = 0; j < transaction_block.size(); ++j) {
+              tools::wallet2::transfer_details td = (*transaction_block[j]);
+              block_size += get_object_blobsize(td.m_tx);
+              block_amount += td.amount();
+          }
+          consolidate_total_amount += block_amount;
+          blocks_amount.push_back(block_amount);
+          total_fee += std::ceil(block_amount * 0.05);
+
+
+          std::istringstream amm(currency::print_money(block_amount));
+          cons_details.transactions = transaction_block.size();
+          cons_details.size = block_size / 1024.0f;
+          amm >> cons_details.amount;
+          res.consolidation.push_back(cons_details);
+
+          tx_count++;
+          if (tx_count > 50)
+              break;
+      }
+
+      if (temp_selected_transfers.size() == 0) {
+          er.code =  WALLET_RPC_ERROR_CODE_NO_CONSOLIDATION_BLOCKS;
+          er.message = "There aren't any blocks available for consolidation...";
+          return true;
+      }
+
+      if (temp_selected_transfers.size() > 0) {
+          er.code =  WALLET_RPC_ERROR_CODE_NO_CONSOLIDATION_BLOCKS;
+          er.message = "Attention: only 50 blocks can be consolidated at once!!!";
+      }
+
+      std::istringstream t_amm(currency::print_money(uint64_t(consolidate_total_amount)));
+      std::istringstream t_fee(currency::print_money(uint64_t(total_fee)));
+      t_amm >> res.amount;
+      t_fee >> res.fee;
+
+      return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_consolidate_inputs(const wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::request& req, wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::response& res, epee::json_rpc::error& er, wallet_rpc_server::connection_context& cntx)
+  {
+    std::list<std::vector<tools::wallet2::transfer_container::iterator>> temp_selected_transfers;
+
+    uint64_t total_size_bytes{0};
+    uint64_t total_amount{0};
+    double total_fee{0};
+
+    m_wallet.consolidate_inputs(temp_selected_transfers, &total_amount, &total_size_bytes);
+
+    res.blocks = temp_selected_transfers.size();
+    res.total_size = total_size_bytes / 1024.0f;
+
+    uint64_t count{0};
+    std::vector<uint64_t>blocks_amount;
+
+    size_t tx_count{0};
+    uint64_t consolidate_total_amount{0};
+    for (auto it : temp_selected_transfers) {
+      wallet_rpc::consolidate_details cons_details;
+      cons_details.block = count++;
+
+        uint64_t block_size{0};
+        uint64_t block_amount{0};
+        const std::vector< tools::wallet2::transfer_container::iterator>& transaction_block = it;
+        for (size_t j = 0; j < transaction_block.size(); ++j) {
+            tools::wallet2::transfer_details td = (*transaction_block[j]);
+            block_size += get_object_blobsize(td.m_tx);
+            block_amount += td.amount();
+        }
+        consolidate_total_amount += block_amount;
+        blocks_amount.push_back(block_amount);
+        total_fee += std::ceil(block_amount * 0.05);
+
+
+        std::istringstream amm(currency::print_money(block_amount));
+        cons_details.transactions = transaction_block.size();
+        cons_details.size = block_size / 1024.0f;
+        amm >> cons_details.amount;
+        res.consolidation.push_back(cons_details);
+
+        tx_count++;
+        if (tx_count > 50)
+            break;
+    }
+
+    if (temp_selected_transfers.size() == 0) {
+      er.code =  WALLET_RPC_ERROR_CODE_NO_CONSOLIDATION_BLOCKS;
+      er.message = "There aren't any blocks available for consolidation...";
+      return true;
+    }
+
+    if (temp_selected_transfers.size() > 0) {
+      er.code =  WALLET_RPC_ERROR_CODE_NO_CONSOLIDATION_BLOCKS;
+      er.message = "Attention: only 50 blocks can be consolidated at once!!!";
+    }
+
+    std::istringstream t_amm(currency::print_money(uint64_t(consolidate_total_amount)));
+    std::istringstream t_fee(currency::print_money(uint64_t(total_fee)));
+    t_amm >> res.amount;
+    t_fee >> res.fee;
+
+    size_t block_count{0};
+
+    for (auto selected_transfers : temp_selected_transfers) {
+      double_t fee = std::ceil(blocks_amount[block_count] * 0.05);
+      // Check if fee is not less than minimum available
+      if (fee < TX_POOL_MINIMUM_FEE) {
+        fee = TX_POOL_MINIMUM_FEE;
+      }
+
+      std::vector<currency::tx_destination_entry> dsts = {
+      currency::tx_destination_entry(blocks_amount[block_count] - fee, m_wallet.get_account_public_address())
+    };
+
+    currency::transaction transaction = AUTO_VAL_INIT(transaction);
+    try {
+      m_wallet.transfer(dsts, 0, 0, fee, {}, transaction, selected_transfers);
+    } catch (const std::exception& e) {
+      er.code =  WALLET_RPC_ERROR_CODE_TRANSFER;
+      er.message = e.what();
+      block_count++;
+      continue;
+    } catch (...) {
+      er.code =  WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
+      er.message = "Unknown error";
+      block_count++;
+      continue;
+    }
+    block_count++;
+    if (block_count > 50)
+      break;
+    }
+
+    return true;
+  }
+  //------------------------------------------------------------------------------------------------------------------------------
   bool wallet_rpc_server::on_getaddress(const wallet_rpc::COMMAND_RPC_GET_ADDRESS::request& req, wallet_rpc::COMMAND_RPC_GET_ADDRESS::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
     try
@@ -135,22 +324,22 @@ namespace tools
     if (m_confirmation_dialog) { //this implementation is for GUI wallet only, use method set_confiramtion_dialog, by default it's false
       if (req.destinations.size() > 0) {
         m_show = true;
-      
+
         m_address = req.destinations.begin()->address;
         m_amount = req.destinations.begin()->amount;
-        
+
         while(m_show) {}
-        
+
         if (!m_accepted) {
           er.code = WALLET_RPC_ERROR_CODE_PAYMENT_CNACELED;
           er.message = "Payment was rejected";
-          return false; 
-        }      
+          return false;
+        }
       }
     }
 
     std::vector<currency::tx_destination_entry> dsts;
-    for (auto it = req.destinations.begin(); it != req.destinations.end(); it++) 
+    for (auto it = req.destinations.begin(); it != req.destinations.end(); it++)
     {
       currency::tx_destination_entry de;
       if(!m_wallet.get_transfer_address(it->address, de.addr))
@@ -180,19 +369,19 @@ namespace tools
     {
       er.code = WALLET_RPC_ERROR_CODE_DAEMON_IS_BUSY;
       er.message = e.what();
-      return false; 
+      return false;
     }
     catch (const std::exception& e)
     {
       er.code = WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR;
       er.message = e.what();
-      return false; 
+      return false;
     }
     catch (...)
     {
       er.code = WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR;
       er.message = "WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR";
-      return false; 
+      return false;
     }
     return true;
   }
@@ -234,7 +423,7 @@ namespace tools
 
     res.payments.clear();
     std::list<wallet2::payment_details> payment_list;
-//    m_wallet.get_payments(payment_id, payment_list);
+  //    m_wallet.get_payments(payment_id, payment_list);
       m_wallet.get_payments_by_id(payment_id, payment_list);
     for (auto & payment : payment_list)
     {
@@ -293,8 +482,8 @@ namespace tools
 
     return true;
   }
-//------------------------------------------------------------------------------------------------------------------------------
-bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res, epee::json_rpc::error& er, connection_context& cntx)
+  //------------------------------------------------------------------------------------------------------------------------------
+  bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANSFERS::request& req, wallet_rpc::COMMAND_RPC_GET_TRANSFERS::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
     return m_wallet.get_transfers(req, res);
   }
@@ -303,7 +492,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   {
     //check available balance
     if (m_wallet.unlocked_balance() <= req.amount)
-    { 
+    {
       res.status = "INSUFFICIENT_COINS";
       return true;
     }
@@ -326,8 +515,8 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
       return true;
     }
 
-    res.tpd.basement_tx_id_hex = string_tools::pod_to_hex(currency::get_transaction_hash(tx));    
-    std::string buff = epee::serialization::store_t_to_binary(acc);    
+    res.tpd.basement_tx_id_hex = string_tools::pod_to_hex(currency::get_transaction_hash(tx));
+    std::string buff = epee::serialization::store_t_to_binary(acc);
     res.tpd.account_keys_hex = string_tools::buff_to_hex_nodelimer(buff);
 
     res.status = "OK";
@@ -391,7 +580,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
 
     }
 
-    //get transaction global output indices 
+    //get transaction global output indices
     currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::request get_ind_req = AUTO_VAL_INIT(get_ind_req);
     currency::COMMAND_RPC_GET_TX_GLOBAL_OUTPUTS_INDEXES::response get_ind_rsp = AUTO_VAL_INIT(get_ind_rsp);
     get_ind_req.txid = currency::get_transaction_hash(tx);
@@ -413,7 +602,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
       //check if input is for telepod's address
       if (currency::is_out_to_acc(acc.get_keys(), boost::get<currency::txout_to_key>(tx.vout[i].target), tx_pub_key, i))
       {
-        //income output 
+        //income output
         amount += tx.vout[i].amount;
         sources.resize(sources.size() + 1);
         currency::tx_source_entry& tse = sources.back();
@@ -456,7 +645,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   bool wallet_rpc_server::on_clonetelepod(const wallet_rpc::COMMAND_RPC_CLONETELEPOD::request& req, wallet_rpc::COMMAND_RPC_CLONETELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
     currency::transaction tx2 = AUTO_VAL_INIT(tx2);
-    //new destination account 
+    //new destination account
     currency::account_base acc2 = AUTO_VAL_INIT(acc2);
     acc2.generate();
 
@@ -491,7 +680,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   bool wallet_rpc_server::on_telepodstatus(const wallet_rpc::COMMAND_RPC_TELEPODSTATUS::request& req, wallet_rpc::COMMAND_RPC_TELEPODSTATUS::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
     currency::transaction tx2 = AUTO_VAL_INIT(tx2);
-    //new destination account 
+    //new destination account
     currency::account_base acc2 = AUTO_VAL_INIT(acc2);
     acc2.generate();
 
@@ -505,7 +694,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
     for (auto& i : tx2.vin)
       req_ki.images.push_back(boost::get<currency::txin_to_key>(i).k_image);
 
-    if (!m_wallet.get_core_proxy()->call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(req_ki, rsp_ki) 
+    if (!m_wallet.get_core_proxy()->call_COMMAND_RPC_COMMAND_RPC_CHECK_KEYIMAGES(req_ki, rsp_ki)
       || rsp_ki.status != CORE_RPC_STATUS_OK
       || rsp_ki.images_stat.size() != req_ki.images.size())
     {
@@ -530,7 +719,7 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   bool wallet_rpc_server::on_withdrawtelepod(const wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::request& req, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx)
   {
     currency::transaction tx2 = AUTO_VAL_INIT(tx2);
-    //parse destination add 
+    //parse destination add
     currency::account_public_address acc_addr = AUTO_VAL_INIT(acc_addr);
     if (!currency::get_account_address_from_str(acc_addr, req.addr))
     {
@@ -592,4 +781,4 @@ bool wallet_rpc_server::on_get_transfers(const wallet_rpc::COMMAND_RPC_GET_TRANS
   {
     return m_address;
   }
-}
+  }

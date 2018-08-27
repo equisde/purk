@@ -58,6 +58,12 @@ namespace tools
         MAP_JON_RPC_WE("withdrawtelepod", on_withdrawtelepod, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD)
 
         MAP_JON_RPC_WE("ping",   on_pingmessagebox,   wallet_rpc::COMMAND_RPC_GET_BALANCE)
+        //consolidation
+        MAP_JON_RPC_WE("sum_inputs",   on_sum_inputs,   wallet_rpc::COMMAND_RPC_SUM_INPUTS)
+        MAP_JON_RPC_WE("consolidate_inputs",   on_consolidate_inputs,   wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS)
+
+        MAP_JON_RPC_WE("get_consolidation_datails",   get_consolidation_details,   wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS)
+        
       END_JSON_RPC_MAP()
     END_URI_MAP2()
 
@@ -76,6 +82,12 @@ namespace tools
       bool on_telepodstatus(const wallet_rpc::COMMAND_RPC_TELEPODSTATUS::request& req, wallet_rpc::COMMAND_RPC_TELEPODSTATUS::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_withdrawtelepod(const wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::request& req, wallet_rpc::COMMAND_RPC_WITHDRAWTELEPOD::response& res, epee::json_rpc::error& er, connection_context& cntx);
       bool on_pingmessagebox(const wallet_rpc::COMMAND_RPC_GET_BALANCE::request& req, wallet_rpc::COMMAND_RPC_GET_BALANCE::response& res, epee::json_rpc::error& er, connection_context& cntx);
+
+      bool on_sum_inputs(const wallet_rpc::COMMAND_RPC_SUM_INPUTS::request& req, wallet_rpc::COMMAND_RPC_SUM_INPUTS::response& res, epee::json_rpc::error& er, connection_context& cntx);
+      bool on_consolidate_inputs(const wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::request& req, wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::response& res, epee::json_rpc::error& er, connection_context& cntx);
+
+      bool get_consolidation_details(const wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::request& req, wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS::response& res, epee::json_rpc::error& er, connection_context& cntx);
+
 
       bool handle_command_line(const boost::program_options::variables_map& vm);
       bool build_transaction_from_telepod(const wallet_rpc::telepod& tlp, const currency::account_public_address& acc2, currency::transaction& tx2, std::string& status);

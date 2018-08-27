@@ -41,7 +41,7 @@ namespace wallet_rpc
     bool          is_income;
     uint64_t      fee;
     wallet_transfer_info_details td;
-    
+
     //not included in serialization map
     currency::transaction tx;
 
@@ -52,7 +52,7 @@ namespace wallet_rpc
       KV_SERIALIZE(unlock_time)
       KV_SERIALIZE(tx_blob_size)
       KV_SERIALIZE(payment_id)
-      KV_SERIALIZE(destinations)     
+      KV_SERIALIZE(destinations)
       KV_SERIALIZE(destination_alias)
       KV_SERIALIZE(is_income)
       KV_SERIALIZE(timestamp)
@@ -100,6 +100,96 @@ namespace wallet_rpc
       END_KV_SERIALIZE_MAP()
     };
   };
+
+  struct consolidate_details
+  {
+    uint64_t block;
+    uint64_t transactions;
+    uint64_t size;
+    uint64_t amount;
+
+    BEGIN_KV_SERIALIZE_MAP()
+      KV_SERIALIZE(block)
+      KV_SERIALIZE(transactions)
+      KV_SERIALIZE(size)
+      KV_SERIALIZE(amount)
+    END_KV_SERIALIZE_MAP()
+  };
+
+  struct COMMAND_RPC_SUM_INPUTS
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      uint64_t blocks;
+      uint64_t size;
+      uint64_t amount;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(blocks)
+        KV_SERIALIZE(size)
+        KV_SERIALIZE(amount)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+  struct COMMAND_RPC_CONSOLIDATE_INPUTS
+  {
+    struct request
+    {
+      BEGIN_KV_SERIALIZE_MAP()
+      END_KV_SERIALIZE_MAP()
+    };
+
+    struct response
+    {
+      uint64_t blocks;
+      uint64_t total_size;
+      uint64_t amount;
+      uint64_t fee;
+
+      std::list<consolidate_details> consolidation;
+
+      BEGIN_KV_SERIALIZE_MAP()
+        KV_SERIALIZE(blocks)
+        KV_SERIALIZE(total_size)
+        KV_SERIALIZE(amount)
+        KV_SERIALIZE(fee)
+        KV_SERIALIZE(consolidation)
+      END_KV_SERIALIZE_MAP()
+    };
+  };
+
+
+  //---------------------------------------------------------------------
+  struct COMMAND_RPC_CONSOLIDATE_DITAILS
+  {
+      struct request
+      {
+        BEGIN_KV_SERIALIZE_MAP()
+        END_KV_SERIALIZE_MAP()
+      };
+
+      struct response
+      {
+          uint64_t blocks;
+          uint64_t total_size;
+          uint64_t amount;
+          uint64_t fee;
+
+          std::list<consolidate_details> consolidation;
+
+      BEGIN_KV_SERIALIZE_MAP()
+              KV_SERIALIZE(consolidation)
+          END_KV_SERIALIZE_MAP()
+      };
+  };
+  //---------------------------------------------------------------------
 
   struct COMMAND_RPC_GET_ADDRESS
   {
@@ -207,7 +297,7 @@ namespace wallet_rpc
     uint64_t unlock_time;
 
     BEGIN_KV_SERIALIZE_MAP()
-      KV_SERIALIZE(payment_id)      
+      KV_SERIALIZE(payment_id)
       KV_SERIALIZE(tx_hash)
       KV_SERIALIZE(amount)
       KV_SERIALIZE(block_height)
@@ -402,4 +492,3 @@ struct COMMAND_RPC_GET_TRANSFERS
 
 }
 }
-

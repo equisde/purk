@@ -2,7 +2,7 @@
 // Distributed under the MIT/X11 software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#pragma  once 
+#pragma  once
 
 
 #define WALLET_RPC_ERROR_CODE_UNKNOWN_ERROR           -1
@@ -11,3 +11,6 @@
 #define WALLET_RPC_ERROR_CODE_GENERIC_TRANSFER_ERROR  -4
 #define WALLET_RPC_ERROR_CODE_WRONG_PAYMENT_ID        -5
 #define WALLET_RPC_ERROR_CODE_PAYMENT_CNACELED        -6
+#define WALLET_RPC_ERROR_CODE_NO_CONSOLIDATION_BLOCKS -7
+#define WALLET_RPC_ERROR_CODE_CONSOLIDATION_IN_PROCESS -8
+#define WALLET_RPC_ERROR_CODE_TRANSFER                -9
