@@ -27,6 +27,7 @@
 #include <QTimer>
 #include <QClipboard>
 #include <QString>
+#include <QStyleFactory>
 #include "warnings.h"
 #include "net/http_client.h"
 
@@ -87,6 +88,7 @@ Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
   setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
   m_webView = new QGraphicsWebView;
+  m_webView->setStyle(QStyleFactory::create("Fusion"));
   //m_webView->setAcceptTouchEvents(true);
   //m_webView->setAcceptHoverEvents(false);
   m_webView->setAcceptTouchEvents(false);
@@ -98,8 +100,8 @@ Html5ApplicationViewerPrivate::Html5ApplicationViewerPrivate(QWidget *parent)
   settings->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls,true);
   settings->setAttribute(QWebSettings::LocalContentCanAccessFileUrls, true);
 
-  // QList<QSslError> expectedSslErrors; 
-  // expectedSslErrors.append(QSslError::SelfSignedCertificate); 
+  // QList<QSslError> expectedSslErrors;
+  // expectedSslErrors.append(QSslError::SelfSignedCertificate);
   // expectedSslErrors.append(QSslError::CertificateUntrusted);
   // reply->ignoreSslErrors(expectedSslErrors);
 
@@ -146,7 +148,7 @@ void Html5ApplicationViewerPrivate::addToJavaScript()
   m_webView->page()->mainFrame()->addToJavaScriptWindowObject("Qt", this);
 }
 
-Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent): QWidget(parent), 
+Html5ApplicationViewer::Html5ApplicationViewer(QWidget *parent): QWidget(parent),
 m_d(new Html5ApplicationViewerPrivate(this)),
 m_quit_requested(false),
 m_deinitialize_done(false),
@@ -174,7 +176,7 @@ m_backend{nullptr}
 
 bool Html5ApplicationViewer::init_config()
 {
-  
+
   epee::serialization::load_t_from_json_file(m_config, m_backend->get_config_folder() + "/" + GUI_CONFIG_FILENAME);
   if (!m_config.wallets_last_used_dir.size())
   {
@@ -231,8 +233,8 @@ void Html5ApplicationViewer::stop_backend()
 {
   if (m_backend != nullptr) {
     m_backend->stop();
-    
-    delete m_backend;  
+
+    delete m_backend;
   }
 }
 
@@ -267,7 +269,7 @@ void Html5ApplicationViewer::changeEvent(QEvent *e)
     } else {
       showNormal();
     }
-    
+
     break;
   }
   default:
@@ -335,7 +337,7 @@ bool Html5ApplicationViewer::removeDir(const QString & dirName)
       return result;
     }
   }
-        
+
   result = QDir().rmdir(dirName);
 }
 
@@ -433,7 +435,7 @@ bool Html5ApplicationViewer::do_close()
 void Html5ApplicationViewer::startTransfering()
 {
   currency::set_accepted(true);
-  currency::set_show_ping(false);  
+  currency::set_show_ping(false);
 
   m_isDialog = false;
 }
@@ -441,7 +443,7 @@ void Html5ApplicationViewer::startTransfering()
 void Html5ApplicationViewer::cancelTransfering()
 {
   currency::set_accepted(false);
-  currency::set_show_ping(false);  
+  currency::set_show_ping(false);
 
   m_isDialog = false;
 }
@@ -454,7 +456,7 @@ void Html5ApplicationViewer::confirm_transfer()
     }
     m_transfering_window = new TransferingWindow(this);
 
-    connect(m_transfering_window, SIGNAL(startTransfering()), this, SLOT(startTransfering()));    
+    connect(m_transfering_window, SIGNAL(startTransfering()), this, SLOT(startTransfering()));
     connect(m_transfering_window, SIGNAL(cancelTransfering()), this, SLOT(cancelTransfering()));
     QString lAmount = QString::number(currency::amount());
     QString lAddress = QString::fromStdString(currency::address());
@@ -539,7 +541,7 @@ void Html5ApplicationViewer::start_wallet_rpc()
   m_worker->moveToThread(m_rpc_thread);
   connect(m_rpc_thread, SIGNAL(started()), m_worker, SLOT(mainLoop()));
   // connect(m_worker, SIGNAL(finished()), m_rpc_thread, SLOT(quit()), Qt::DirectConnection);
-  
+
   m_rpc_thread->start();
 }
 
@@ -621,7 +623,7 @@ void Html5ApplicationViewer::close_wallet()
 void Html5ApplicationViewer::add_address(const QString& name, const QString& address,
 	const QString& alias, const QString& paymentId)
 {
-	gui_config::addressbook_entry row({ name.toStdString(), 
+	gui_config::addressbook_entry row({ name.toStdString(),
 		address.toStdString(), alias.toStdString(), paymentId.toStdString() });
 	m_config.address_book.entries.push_back(row);
 }
@@ -633,7 +635,7 @@ void Html5ApplicationViewer::delete_address(const QString& name, const QString& 
 		address.toStdString(), alias.toStdString(), paymentId.toStdString() });
 	m_config.address_book.entries.erase(
 		std::remove(m_config.address_book.entries.begin(),
-		m_config.address_book.entries.end(), row), 
+		m_config.address_book.entries.end(), row),
 		m_config.address_book.entries.end()
 		);
 }
@@ -810,13 +812,13 @@ bool Html5ApplicationViewer::restore_wallet(const QString& restore_text, const Q
     show_msg_box("Empty wallet path");
     return false;
   }
- 
+
   m_config.wallets_last_used_dir = boost::filesystem::path(path.toStdString()).parent_path().string();
- 
+
   m_backend->set_restore_wallet_from_zero(true);
 
   return m_backend->restore_wallet(path.toStdString(), restore_text.toStdString(), password.toStdString());
-} 
+}
 
 void Html5ApplicationViewer::reconnect()
 {
@@ -833,7 +835,7 @@ void Html5ApplicationViewer::resync_blockcahin()
   QMessageBox msgBox(QMessageBox::NoIcon,
     "Warning!",
     "Warning! All blockchain data will be deleted and resynced from 0. This will take some time. Do you want to proceed?",
-    QMessageBox::Yes | QMessageBox::No, 
+    QMessageBox::Yes | QMessageBox::No,
     this);
   msgBox.setDefaultButton(QMessageBox::Yes);
   msgBox.setWindowFlags(Qt::Dialog | Qt::CustomizeWindowHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
@@ -842,8 +844,8 @@ void Html5ApplicationViewer::resync_blockcahin()
     QString blockchain_foler = QString::fromStdString(m_backend->get_config_folder());
     delete m_backend;
 
-    removeDir(blockchain_foler);  
-    
+    removeDir(blockchain_foler);
+
     int argc = 1;
     char *argv[1];
     argv[0] = "Purk";
