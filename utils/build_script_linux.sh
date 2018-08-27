@@ -1,6 +1,6 @@
 #!/bin/bash
 
-QT_PREFIX_PATH="$HOME/Qt5.5.1/5.5/gcc_64"
+QT_PREFIX_PATH="$HOME/Qt/5.5/gcc_64"
 QT_BINARIES_PATH="$HOME/purk_binaries"
 PROJECT_ROOT="$HOME/purk"
 
