@@ -62,7 +62,7 @@ namespace tools
         MAP_JON_RPC_WE("sum_inputs",   on_sum_inputs,   wallet_rpc::COMMAND_RPC_SUM_INPUTS)
         MAP_JON_RPC_WE("consolidate_inputs",   on_consolidate_inputs,   wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS)
 
-        MAP_JON_RPC_WE("get_consolidation_datails",   get_consolidation_details,   wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS)
+        MAP_JON_RPC_WE("get_consolidation_details",   get_consolidation_details,   wallet_rpc::COMMAND_RPC_CONSOLIDATE_INPUTS)
         
       END_JSON_RPC_MAP()
     END_URI_MAP2()
