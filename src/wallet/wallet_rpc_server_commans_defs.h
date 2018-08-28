@@ -105,8 +105,8 @@ namespace wallet_rpc
   {
     uint64_t block;
     uint64_t transactions;
-    uint64_t size;
-    uint64_t amount;
+    double size;
+    std::string amount;
 
     BEGIN_KV_SERIALIZE_MAP()
       KV_SERIALIZE(block)
@@ -127,8 +127,8 @@ namespace wallet_rpc
     struct response
     {
       uint64_t blocks;
-      uint64_t size;
-      uint64_t amount;
+      double size;
+      std::string amount;
 
       BEGIN_KV_SERIALIZE_MAP()
         KV_SERIALIZE(blocks)
@@ -149,9 +149,9 @@ namespace wallet_rpc
     struct response
     {
       uint64_t blocks;
-      uint64_t total_size;
-      uint64_t amount;
-      uint64_t fee;
+      double total_size;
+      std::string amount;
+      std::string fee;
 
       std::list<consolidate_details> consolidation;
 
@@ -163,31 +163,6 @@ namespace wallet_rpc
         KV_SERIALIZE(consolidation)
       END_KV_SERIALIZE_MAP()
     };
-  };
-
-
-  //---------------------------------------------------------------------
-  struct COMMAND_RPC_CONSOLIDATE_DITAILS
-  {
-      struct request
-      {
-        BEGIN_KV_SERIALIZE_MAP()
-        END_KV_SERIALIZE_MAP()
-      };
-
-      struct response
-      {
-          uint64_t blocks;
-          uint64_t total_size;
-          uint64_t amount;
-          uint64_t fee;
-
-          std::list<consolidate_details> consolidation;
-
-      BEGIN_KV_SERIALIZE_MAP()
-              KV_SERIALIZE(consolidation)
-          END_KV_SERIALIZE_MAP()
-      };
   };
   //---------------------------------------------------------------------
 
