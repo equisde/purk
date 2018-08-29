@@ -4,18 +4,22 @@
 * Website: https://purkproject.com
 * Docs: https://docs.purkproject.com
 * Explorer: https://explorer.purkproject.com
-* Pool: https://pool.purkproject.com
+* API: https://api.purkproject.com
 * Donate: https://donate.purkproject.com
 * Github: https://github.com/purkproject/purk
 * Discord: https://discord.gg/cqmSrfz
 
 ## Introduction
 
-Purk is an open source, secure and untraceable cryptocurrency for donations, tips and instant private payments with minimal transaction fees. Based on CryptoNote technology, Purk helps balance CPU, GPU and ASIC mining speeds, which encourages fair and equal distribution whilst providing extremely fast block verification times.
+Purk is an open source, ASIC resistant, secure and untraceable cryptocurrency for donations, tips and instant private payments with minimal transaction fees. Based on CryptoNote technology, Purk helps balance CPU and GPU mining speeds, which encourages fair and equal distribution whilst providing extremely fast block verification times.
 
 ## Purk Button
 
-The Purk Button API is accessible from the GUI wallet. Users can generate an embed code to accept Purk as a donation on their website or application. Visit the "Purk API" page in the GUI wallet to get started. The Purk Button is compatible with Chrome, Firefox, Opera and soon Microsoft Edge and Internet Explorer [[1]](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/11963735/). Safari is not supported [[2]](https://bugs.webkit.org/show_bug.cgi?id=171934).
+The Purk Button is accessible from the GUI wallet. Users can generate an embed code to accept Purk as a donation on their website or application. Visit the "Purk Button" page in the GUI wallet to get started. The Purk Button is compatible with Chrome, Firefox, Opera and soon Microsoft Edge and Internet Explorer [[1]](https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/11963735/). Safari is not supported [[2]](https://bugs.webkit.org/show_bug.cgi?id=171934).
+
+## Purk Button API
+
+You can use the Purk Button API to build advanced websites and applications that accept donations and micropayments. Whether you want to monetize website content, create fundraising platforms or raise money for charitable causes; the Purk Button API has everything you need to integrate Purk with your website and retrieve detailed statistics about payments and donations being made by your users.
 
 ## About this Project
 
@@ -26,6 +30,7 @@ Anyone is able to contribute to Purk. If you have a bug fix or code change, feel
 ## Features
 
 * Purk Button
+* Purk Donations API
 * Wallet Address Aliases
 * Untraceable payments
 * Unlinkable Transactions
