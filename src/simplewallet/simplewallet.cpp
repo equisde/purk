@@ -251,6 +251,16 @@ bool simple_wallet::suminput(const std::vector<string> &args) {
  * @return
  */
 bool simple_wallet::consolidateinputs(const std::vector<string> &args) {
+    currency::account_public_address destinationAddress;
+    if (args.size() == 0)
+    {
+        destinationAddress = m_wallet->get_account_public_address();
+    }
+    else if (!m_wallet->get_transfer_address(args[0], destinationAddress))
+    {
+        fail_msg_writer() << "wrong address: " << args[0];
+        return true;
+    }
 
     std::list<std::vector<tools::wallet2::transfer_container::iterator>> temp_selected_transfers;
 
@@ -323,7 +333,7 @@ bool simple_wallet::consolidateinputs(const std::vector<string> &args) {
             }
 
             std::vector<currency::tx_destination_entry> dsts = {
-                currency::tx_destination_entry(blocks_amount[block_count] - fee, m_wallet->get_account_public_address())
+                currency::tx_destination_entry(blocks_amount[block_count] - fee, destinationAddress)
             };
 
             currency::transaction transaction = AUTO_VAL_INIT(transaction);
