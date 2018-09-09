@@ -11,6 +11,7 @@
 using namespace epee;
 
 #include "wallet2.h"
+#include "common/util.h"
 #include "currency_core/currency_format_utils.h"
 #include "rpc/core_rpc_server_commands_defs.h"
 #include "misc_language.h"
@@ -677,8 +678,13 @@ void wallet2::load(const std::string& wallet_, const std::string& password)
 //----------------------------------------------------------------------------------------------------
 void wallet2::store()
 {
-    bool r = tools::serialize_obj_to_file(*this, m_wallet_file);
-    CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, m_wallet_file);
+    const std::string temporaryName = m_wallet_file + ".new";
+
+    bool r = tools::serialize_obj_to_file(*this, temporaryName);
+    CHECK_AND_THROW_WALLET_EX(!r, error::file_save_error, temporaryName);
+
+    std::error_code ec = tools::replace_file(temporaryName, m_wallet_file);
+    CHECK_AND_THROW_WALLET_EX(ec, error::file_save_error, m_wallet_file);
 }
 //----------------------------------------------------------------------------------------------------
 uint64_t wallet2::unlocked_balance()
