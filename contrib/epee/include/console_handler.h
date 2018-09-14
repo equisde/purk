@@ -242,6 +242,7 @@ namespace epee
 
     void stop()
     {
+      m_running = false;
       m_stdin_reader.stop();
     }
 
@@ -253,6 +254,10 @@ namespace epee
       bool continue_handle = true;
       while(continue_handle)
       {
+        if (!m_running)
+        {
+          break;
+        }
         if (!prompt.empty())
         {
           epee::log_space::set_console_color(epee::log_space::console_color_yellow, true);
@@ -321,6 +326,7 @@ namespace epee
 
   private:
     async_stdin_reader m_stdin_reader;
+    bool m_running = true;
   };
 
 
