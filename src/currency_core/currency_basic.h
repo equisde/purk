@@ -24,11 +24,13 @@
 #include "misc_language.h"
 #include "tx_extra.h"
 #include "block_flags.h"
+#include "include/CryptoNote.h"
 
 namespace currency
 {
 
   const static crypto::hash null_hash = AUTO_VAL_INIT(null_hash);
+  const static Crypto::Hash null_hash2 = AUTO_VAL_INIT(null_hash2);
   const static crypto::public_key null_pkey = AUTO_VAL_INIT(null_pkey);
   const static crypto::secret_key null_skey = AUTO_VAL_INIT(null_skey);
   const static crypto::signature null_sig = AUTO_VAL_INIT(null_sig);

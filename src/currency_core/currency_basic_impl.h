@@ -7,9 +7,10 @@
 #include "currency_basic.h"
 #include "crypto/crypto.h"
 #include "crypto/hash.h"
+#include "include/CryptoNote.h"
 
 
-namespace currency 
+namespace currency
 {
   /************************************************************************/
   /*                                                                      */
@@ -57,6 +58,7 @@ std::ostream &print256(std::ostream &o, const T &v) {
 }
 
 bool parse_hash256(const std::string str_hash, crypto::hash& hash);
+bool parse_hash256(const std::string str_hash, Crypto::Hash& hash);
 
 namespace crypto {
   inline std::ostream &operator <<(std::ostream &o, const crypto::public_key &v) { return print256(o, v); }

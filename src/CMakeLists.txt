@@ -4,6 +4,12 @@ file(GLOB_RECURSE CURRENCY_CORE currency_core/*)
 file(GLOB_RECURSE CURRENCY_PROTOCOL currency_protocol/*)
 file(GLOB_RECURSE DAEMON daemon/*)
 file(GLOB_RECURSE SIMPLEMINER miner/*)
+file(GLOB_RECURSE LOGGING logging/*)
+file(GLOB_RECURSE INCLUDES include/*)
+file(GLOB_RECURSE NODERPC node_rpc_proxy/*)
+file(GLOB_RECURSE HTTP http/*)
+file(GLOB_RECURSE SYSTEM system/*)
+file(GLOB_RECURSE PLATFORM platform/*)
 
 file(GLOB_RECURSE P2P p2p/*)
 file(GLOB_RECURSE RPC rpc/*)
@@ -12,6 +18,8 @@ file(GLOB_RECURSE SIMPLEWALLET simplewallet/*)
 file(GLOB_RECURSE CONN_TOOL connectivity_tool/*)
 file(GLOB_RECURSE WALLET wallet/*)
 file(GLOB_RECURSE MINER miner/*)
+file(GLOB_RECURSE PAYMENTGATE payment_gate/*)
+file(GLOB_RECURSE PAYMENTGATESERVICE payment_gate_/*)
 
 FIND_PACKAGE(Qt5Widgets)
 
@@ -30,6 +38,9 @@ source_group(common FILES ${COMMON})
 source_group(crypto FILES ${CRYPTO})
 source_group(currency_core FILES ${CURRENCY_CORE})
 source_group(currency_protocol FILES ${CURRENCY_PROTOCOL})
+source_group(http FILES ${HTTP})
+source_group(platform FILES ${SYSTEM})
+source_group(system FILES ${SYSTEM})
 source_group(daemon FILES ${DAEMON})
 source_group(p2p FILES ${P2P})
 source_group(rpc FILES ${RPC})
@@ -38,6 +49,11 @@ source_group(simplewallet FILES ${SIMPLEWALLET})
 source_group(simpleminer FILES ${SIMPLEMINER})
 source_group(connectivity-tool FILES ${CONN_TOOL})
 source_group(wallet FILES ${WALLET})
+source_group(logging FILES ${LOGGING})
+source_group(include FILES ${INCLUDES})
+source_group(node-rpc FILES ${NODERPC})
+source_group(payment-gate FILES ${PAYMENTGATE})
+source_group(payment-gate-service FILES ${PAYMENTGATESERVICE})
 
 if(BUILD_GUI)
   source_group(qtdaemon FILES ${QTDAEMON})
@@ -49,6 +65,13 @@ add_library(crypto ${CRYPTO})
 add_library(currency_core ${CURRENCY_CORE})
 add_dependencies(currency_core version)
 add_library(rpc ${RPC})
+add_library(logging ${LOGGING})
+add_library(http ${HTTP})
+#add_library(include ${INCLUDES})
+add_library(node_rpc ${NODERPC})
+add_library(platform ${PLATFORM})
+add_library(system ${SYSTEM})
+
 
 add_dependencies(rpc version)
 
@@ -63,6 +86,7 @@ add_executable(connectivity_tool ${CONN_TOOL})
 add_dependencies(connectivity_tool version)
 target_link_libraries(connectivity_tool currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
+
 add_library(simplewallet_lib ${SIMPLEWALLET_LIB})
 add_dependencies(simplewallet_lib version)
 target_link_libraries(simplewallet_lib wallet rpc currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
@@ -71,9 +95,18 @@ add_executable(simplewallet ${SIMPLEWALLET})
 add_dependencies(simplewallet version)
 target_link_libraries(simplewallet simplewallet_lib wallet rpc currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
 
+
+
 add_executable(simpleminer ${SIMPLEMINER})
 add_dependencies(simpleminer version)
 target_link_libraries(simpleminer currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+
+
+add_library(payment_gate ${PAYMENTGATE})
+add_dependencies(payment_gate version)
+target_link_libraries(simplewallet simplewallet_lib wallet rpc currency_core crypto common ${CMAKE_THREAD_LIBS_INIT} ${Boost_LIBRARIES})
+
+
 
 set_property(TARGET common crypto currency_core rpc wallet PROPERTY FOLDER "libs")
 set_property(TARGET daemon simplewallet_lib simpleminer connectivity_tool PROPERTY FOLDER "prog")
